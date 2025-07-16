@@ -1,3 +1,4 @@
-Source/AthenaFramework/.vs/
-Source/AthenaFramework/obj/
-Source/AthenaFramework/Weapons/Abilities/CompAbilityEffect_RevivalConversion.cs
+**/Assemblies
+**/.vs
+**/.idea
+**/obj
