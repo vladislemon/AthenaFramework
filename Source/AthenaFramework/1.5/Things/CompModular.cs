@@ -120,15 +120,16 @@ namespace AthenaFramework
 
         public virtual void InstallModule(ThingWithComps thing)
         {
-            CompUseEffect_Module comp = thing.TryGetComp<CompUseEffect_Module>();
+            Thing module = thing.SplitOff(1);
+            CompUseEffect_Module comp = module.TryGetComp<CompUseEffect_Module>();
 
             if (!comp.Install(this))
             {
+                GenPlace.TryPlaceThing(module, parent.Position, parent.Map, ThingPlaceMode.Near);
                 return;
             }
 
-            thing.DeSpawnOrDeselect();
-            moduleHolder.TryAdd(thing, false);
+            moduleHolder.TryAdd(module, false);
             RecacheGizmo();
 
             if (AthenaCache.renderCache.TryGetValue(parent.thingIDNumber, out List<IRenderable> mods))

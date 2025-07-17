@@ -16,7 +16,6 @@ namespace AthenaFramework
 
         public string usedSlot;
         public List<ThingComp> linkedComps = new List<ThingComp>();
-        public CompModular ownerComp;
         public ThingWithComps ownerThing;
 
         public Dictionary<StatDef, float> equippedStatOffsets = new Dictionary<StatDef, float>();
@@ -74,19 +73,12 @@ namespace AthenaFramework
         {
             get
             {
-                if (ownerComp != null)
-                {
-                    return ownerComp;
-                }
-
                 if (ownerThing == null)
                 {
                     return null;
                 }
 
-                ownerComp = ownerThing.TryGetComp<CompModular>();
-
-                return ownerComp;
+                return ownerThing.TryGetComp<CompModular>();
             }
         }
 
@@ -118,7 +110,6 @@ namespace AthenaFramework
             if (OwnerComp == null || OwnerComp.parent == null)
             {
                 ownerThing = null;
-                ownerComp = null;
                 return;
             }
 
@@ -241,7 +232,6 @@ namespace AthenaFramework
                 linkedComps.RemoveAt(i);
             }
 
-            ownerComp = null;
             ownerThing = null;
 
             return true;
@@ -472,6 +462,14 @@ namespace AthenaFramework
             }
 
             return false;
+        }
+
+        public override void PostSplitOff(Thing piece)
+        {
+            base.PostSplitOff(piece);
+            CompUseEffect_Module comp = piece.TryGetComp<CompUseEffect_Module>();
+            comp.usedSlot = usedSlot;
+            comp.ownerThing = ownerThing;
         }
     }
 

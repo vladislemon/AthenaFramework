@@ -14,7 +14,6 @@ namespace AthenaFramework
         private new CompProperties_UseEffectHediffModule Props => props as CompProperties_UseEffectHediffModule;
 
         public string usedSlot;
-        public HediffComp_Modular ownerComp;
         public HediffWithComps ownerHediff;
         public List<HediffComp> linkedComps = new List<HediffComp>();
         public List<Hediff> linkedHediffs = new List<Hediff>();
@@ -63,19 +62,12 @@ namespace AthenaFramework
         {
             get
             {
-                if (ownerComp != null)
-                {
-                    return ownerComp;
-                }
-
                 if (ownerHediff == null)
                 {
                     return null;
                 }
 
-                ownerComp = ownerHediff.TryGetComp<HediffComp_Modular>();
-
-                return ownerComp;
+                return ownerHediff.TryGetComp<HediffComp_Modular>();
             }
         }
 
@@ -167,7 +159,6 @@ namespace AthenaFramework
                 linkedHediffs.RemoveAt(i);
             }
 
-            ownerComp = null;
             ownerHediff = null;
 
             return true;
@@ -226,7 +217,6 @@ namespace AthenaFramework
         {
             if (OwnerComp == null || OwnerComp.parent == null || OwnerComp.Pawn == null)
             {
-                ownerComp = null;
                 ownerHediff = null;
                 return;
             }
@@ -269,7 +259,14 @@ namespace AthenaFramework
 
             return "Cannot apply: No compatible slots availible.";
         }
-            
+
+        public override void PostSplitOff(Thing piece)
+        {
+            base.PostSplitOff(piece);
+            CompUseEffect_HediffModule comp = piece.TryGetComp<CompUseEffect_HediffModule>();
+            comp.usedSlot = usedSlot;
+            comp.ownerHediff = ownerHediff;
+        }
     }
 
     public class CompProperties_UseEffectHediffModule : CompProperties_UseEffect

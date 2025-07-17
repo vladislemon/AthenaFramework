@@ -104,15 +104,16 @@ namespace AthenaFramework
         
         public virtual void InstallModule(ThingWithComps thing)
         {
-            CompUseEffect_HediffModule comp = thing.TryGetComp<CompUseEffect_HediffModule>();
+            Thing module = thing.SplitOff(1);
+            CompUseEffect_HediffModule comp = module.TryGetComp<CompUseEffect_HediffModule>();
 
             if (!comp.Install(this))
             {
+                GenPlace.TryPlaceThing(module, Pawn.Position, Pawn.Map, ThingPlaceMode.Near);
                 return;
             }
 
-            thing.DeSpawnOrDeselect();
-            moduleHolder.TryAdd(thing, false);
+            moduleHolder.TryAdd(module, false);
             resetCache = true;
             RecacheGizmo();
 
