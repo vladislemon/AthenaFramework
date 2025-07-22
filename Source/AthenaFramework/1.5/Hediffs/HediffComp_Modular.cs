@@ -240,9 +240,9 @@ namespace AthenaFramework
                 return;
             }
 
-            while (moduleHolder.Count > 0)
+            foreach (var module in moduleHolder)
             {
-                RemoveModule(moduleHolder[0]);
+                RemoveModule(module);
             }
         }
 
