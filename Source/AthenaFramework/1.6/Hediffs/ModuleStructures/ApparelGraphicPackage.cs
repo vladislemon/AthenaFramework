@@ -147,7 +147,7 @@ namespace AthenaFramework
                         return null;
                     }
 
-                    return apparel.Wearer.story.favoriteColor;
+                    return apparel.Wearer.story.favoriteColor.color;
 
                 case ApparelPackageColor.PrimaryColor:
                     IColorSelector comp = null;

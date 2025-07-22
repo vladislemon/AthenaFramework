@@ -40,7 +40,7 @@ namespace AthenaFramework
                 {
                     if (Pawn != null && Pawn.story != null && Pawn.story.favoriteColor != null)
                     {
-                        primaryColor = Pawn.story.favoriteColor;
+                        primaryColor = Pawn.story.favoriteColor.color;
                         return primaryColor.Value;
                     }
                 }
@@ -105,7 +105,7 @@ namespace AthenaFramework
                 {
                     if (Pawn != null && Pawn.story != null && Pawn.story.favoriteColor != null)
                     {
-                        secondaryColor = Pawn.story.favoriteColor;
+                        secondaryColor = Pawn.story.favoriteColor.color;
                         return secondaryColor.Value;
                     }
                 }

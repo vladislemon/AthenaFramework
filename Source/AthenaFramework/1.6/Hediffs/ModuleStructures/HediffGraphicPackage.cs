@@ -154,7 +154,7 @@ namespace AthenaFramework
                         return null;
                     }
 
-                    return hediff.pawn.story.favoriteColor;
+                    return hediff.pawn.story.favoriteColor.color;
 
                 case HediffPackageColor.SkinColor:
                     if (hediff.pawn.story == null)
