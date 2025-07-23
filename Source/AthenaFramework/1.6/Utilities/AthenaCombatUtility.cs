@@ -275,6 +275,43 @@ namespace AthenaFramework
             return null;
         }
 
+        public static void ApplyProjectileDamageModifier(Projectile projectile, Thing hitThing, ref DamageInfo damageInfo)
+        {
+            if (projectile.DamageAmount <= 0)
+            {
+                return;
+            }
+
+            float multiplier = 1f;
+            float offset = 0f;
+            List<string> excludedGlobal = new List<string>();
+
+            if (projectile.def.GetModExtension<DamageModifierExtension>() != null)
+            {
+                multiplier *= projectile.def.GetModExtension<DamageModifierExtension>().OutgoingDamageMultiplier;
+            }
+
+            if (AthenaCache.damageCache.TryGetValue(projectile.thingIDNumber, out List<IDamageModifier> mods2))
+            {
+                for (int i = mods2.Count - 1; i >= 0; i--)
+                {
+                    IDamageModifier modifierComp = mods2[i];
+
+                    (float, float) result = modifierComp.GetOutcomingDamageModifier(hitThing, ref excludedGlobal, projectile.Launcher, null, true);
+                    multiplier *= result.Item1;
+                    offset += result.Item2;
+                }
+            }
+
+            if (multiplier == 1f && offset == 0f)
+            {
+                return;
+            }
+
+            float weaponDamageMultiplier = multiplier + offset / projectile.DamageAmount;
+            damageInfo.SetAmount(damageInfo.Amount * weaponDamageMultiplier);
+        }
+
         #endregion
 
         #region ===== Shoot Lines =====

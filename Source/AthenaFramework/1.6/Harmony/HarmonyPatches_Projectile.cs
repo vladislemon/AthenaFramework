@@ -1,17 +1,15 @@
-﻿using HarmonyLib;
-using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Reflection.Emit;
+using HarmonyLib;
+using RimWorld;
 using UnityEngine;
 using Verse;
-using static UnityEngine.UI.Image;
 
 namespace AthenaFramework
 {
-    [HarmonyPatch(typeof(Projectile), nameof(Projectile.Launch), new System.Type[] { typeof(Thing), typeof(Vector3), typeof(LocalTargetInfo), typeof(LocalTargetInfo), typeof(ProjectileHitFlags), typeof(bool), typeof(Thing), typeof(ThingDef) })]
+    [HarmonyPatch(typeof(Projectile), nameof(Projectile.Launch), new Type[] { typeof(Thing), typeof(Vector3), typeof(LocalTargetInfo), typeof(LocalTargetInfo), typeof(ProjectileHitFlags), typeof(bool), typeof(Thing), typeof(ThingDef) })]
     public static class Projectile_PostLaunch
     {
         public static void Postfix(Projectile __instance, Thing launcher, ref Vector3 origin, LocalTargetInfo usedTarget, LocalTargetInfo intendedTarget, ProjectileHitFlags hitFlags, bool preventFriendlyFire, Thing equipment, ThingDef targetCoverDef)
@@ -60,39 +58,51 @@ namespace AthenaFramework
                     projectile.Impact(hitThing, ref blockedByShield);
                 }
             }
+        }
+    }
 
-            if (__instance.DamageAmount <= 0)
+    // Well, as I found out, arrows are bullets, but maybe some projectiles are not,
+    // so we might need to patch multiple classes - children of Projectile TODO
+    [HarmonyPatch(typeof(Bullet), "Impact")]
+    public class Bullet_Impact
+    {
+        private static MethodInfo _takeDamageMethod = typeof(Thing).Method("TakeDamage");
+
+        private static MethodInfo _applyDamageModifierMethod =
+            typeof(AthenaCombatUtility).Method("ApplyProjectileDamageModifier");
+
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            int matchCount = 0;
+            CodeInstruction lastLdlocS = null;
+            foreach (var instruction in instructions)
             {
-                return;
-            }
-
-            float multiplier = 1f;
-            float offset = 0f;
-            List<string> excludedGlobal = new List<string>();
-
-            if (__instance.def.GetModExtension<DamageModifierExtension>() != null)
-            {
-                multiplier *= __instance.def.GetModExtension<DamageModifierExtension>().OutgoingDamageMultiplier;
-            }
-
-            if (AthenaCache.damageCache.TryGetValue(__instance.thingIDNumber, out List<IDamageModifier> mods2))
-            {
-                for (int i = mods2.Count - 1; i >= 0; i--)
+                if (instruction.opcode == OpCodes.Ldloc_S)
                 {
-                    IDamageModifier modifierComp = mods2[i];
-
-                    (float, float) result = modifierComp.GetOutcomingDamageModifier(hitThing, ref excludedGlobal, __instance.Launcher, null, true);
-                    multiplier *= result.Item1;
-                    offset += result.Item2;
+                    lastLdlocS = instruction;
                 }
+
+                if (instruction.opcode == OpCodes.Callvirt && instruction.operand as MethodInfo == _takeDamageMethod)
+                {
+                    if (lastLdlocS != null)
+                    {
+                        matchCount++;
+                        yield return new CodeInstruction(OpCodes.Pop);
+                        yield return new CodeInstruction(OpCodes.Ldarg_0);
+                        yield return new CodeInstruction(OpCodes.Ldarg_1);
+                        yield return new CodeInstruction(OpCodes.Ldloca_S, lastLdlocS.operand);
+                        yield return new CodeInstruction(OpCodes.Call, _applyDamageModifierMethod);
+                        yield return new CodeInstruction(OpCodes.Ldloc_S, lastLdlocS.operand);
+                    }
+                }
+
+                yield return instruction;
             }
 
-            if (multiplier == 1f && offset == 0f)
+            if (matchCount == 0)
             {
-                return;
+                Log.Error("Failed to patch method Bullet.Impact");
             }
-
-            __instance.weaponDamageMultiplier = __instance.weaponDamageMultiplier * multiplier + offset / __instance.DamageAmount;
         }
     }
 }
