@@ -125,7 +125,7 @@ namespace AthenaFramework
 
             if (!comp.Install(this))
             {
-                GenPlace.TryPlaceThing(module, parent.Position, parent.Map, ThingPlaceMode.Near);
+                GenPlace.TryPlaceThing(module, Holder?.Position ?? parent.Position, Holder?.Map ?? parent.Map, ThingPlaceMode.Near);
                 return;
             }
 
@@ -150,7 +150,7 @@ namespace AthenaFramework
                 return;
             }
 
-            moduleHolder.TryDrop(thing, parent.Position, parent.Map, ThingPlaceMode.Near, 1, out Thing placedThing);
+            moduleHolder.TryDrop(thing, Holder?.Position ?? parent.Position, Holder?.Map ?? parent.Map, ThingPlaceMode.Near, 1, out Thing placedThing);
             RecacheGizmo();
 
             if (AthenaCache.renderCache.TryGetValue(parent.thingIDNumber, out List<IRenderable> mods))

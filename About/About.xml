@@ -12,7 +12,7 @@
 		<li>1.6</li>
 	</supportedVersions>
 	<packageId>smartkar.athenaframework</packageId>
-	<modVersion>1.6.1</modVersion>
+	<modVersion>1.6.2</modVersion>
 	<modDependencies>
 
 		<li>

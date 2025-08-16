@@ -22,7 +22,7 @@ namespace AthenaFramework
         {
             get
             {
-                return Props.slotIDs;
+                return Props.slotIDs ?? [];
             }
         }
 
@@ -38,7 +38,7 @@ namespace AthenaFramework
         {
             get
             {
-                return Props.excludeIDs;
+                return Props.excludeIDs ?? [];
             }
         }
 
