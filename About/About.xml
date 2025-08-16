@@ -2,7 +2,10 @@
 
 <ModMetaData>
 	<name>Athena Framework</name>
-	<author>SmArtKar</author>
+	<authors>
+		<li>SmArtKar</li>
+		<li>vladislemon</li>
+	</authors>
 	<supportedVersions>
 		<li>1.4</li>
 		<li>1.5</li>
